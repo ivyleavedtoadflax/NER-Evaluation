@@ -659,3 +659,68 @@ def test_evaluator_list_non_matching_corpus_length():
         evaluator = Evaluator(true, pred, tags=['PER', 'MISC'], loader="list")
         evaluator.evaluate()
 
+def test_evaluator_on_single_token():
+
+    true = [
+        ['PER'],
+    ]
+
+    pred = [
+        ['PER'],
+    ]
+
+    evaluator = Evaluator(true, pred, tags=['PER'], list=True)
+
+    results, results_agg = evaluator.evaluate()
+
+    expected = {
+        'strict': {
+            'correct': 1,
+            'incorrect': 0,
+            'partial': 0,
+            'missed': 0,
+            'spurious': 0,
+            'possible': 1,
+            'actual': 1,
+            'precision': 1.0,
+            'recall': 1.0,
+        },
+        'ent_type': {
+            'correct': 1,
+            'incorrect': 0,
+            'partial': 0,
+            'missed': 0,
+            'spurious': 0,
+            'possible': 1,
+            'actual': 1,
+            'precision': 1.0,
+            'recall': 1.0,
+        },
+        'partial': {
+            'correct': 1,
+            'incorrect': 0,
+            'partial': 0,
+            'missed': 0,
+            'spurious': 0,
+            'possible': 1,
+            'actual': 1,
+            'precision': 1.0,
+            'recall': 1.0,
+        },
+        'exact': {
+            'correct': 1,
+            'incorrect': 0,
+            'partial': 0,
+            'missed': 0,
+            'spurious': 0,
+            'possible': 1,
+            'actual': 1,
+            'precision': 1.0,
+            'recall': 1.0,
+        }
+    }
+
+    assert expected["strict"] == results["strict"]
+    assert expected["ent_type"] == results["ent_type"]
+    assert expected["partial"] == results["partial"]
+    assert expected["exact"] == results["exact"]
