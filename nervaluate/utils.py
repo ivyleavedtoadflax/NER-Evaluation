@@ -58,26 +58,41 @@ def collect_named_entities(tokens):
     end_offset = None
     ent_type = None
 
-    for offset, token_tag in enumerate(tokens):
+    # Case 1: entity ends space begins
+    # Case 2: Entity begins from space
+    # Case 3: One entity ends, and another immediately begins
 
+    for offset, token_tag in enumerate(tokens):
+        # Walk through teh tokens
         if token_tag == 'O':
+            # Case 1
+            # When an 'O' (outside) is hit, check to see whether an entity 
+            # immediately preceded it. If so, append a new entity, subtracting
+            # one from the current token number to give the end of the previous
+            # token.
             if ent_type is not None and start_offset is not None:
                 end_offset = offset - 1
                 named_entities.append({"label": ent_type, "start": start_offset, "end":end_offset})
+                # Reset the offsets and the entity type
                 start_offset = None
                 end_offset = None
                 ent_type = None
 
         elif ent_type is None:
+            # If just the entity type is missing, then cut off the B, I, E from
+            # the entity type and set this as the entity type.
             ent_type = token_tag[2:]
             start_offset = offset
 
         elif ent_type != token_tag[2:] or (ent_type == token_tag[2:] and token_tag[:1] == 'B'):
+            # If the current entity type does not match the previous one, or it
+            # is the start of a new entity (i.e. B-...), then append the
+            # previous entity to the list of spans...
 
             end_offset = offset - 1
             named_entities.append({"label": ent_type, "start": start_offset, "end":end_offset})
 
-            # start of a new entity
+            # ... and start a new entity
             ent_type = token_tag[2:]
             start_offset = offset
             end_offset = None
@@ -90,29 +105,6 @@ def collect_named_entities(tokens):
     return named_entities
 
 
-def test_list_to_spans():
-
-    before = [
-        ['O', 'B-LOC', 'I-LOC', 'B-LOC', 'I-LOC', 'O'],
-        ['O', 'B-GPE', 'I-GPE', 'B-GPE', 'I-GPE', 'O'],
-    ]
-
-    expected = [
-        [
-            {"label": "LOC", "start": 1, "end": 2},
-            {"label": "LOC", "start": 3, "end": 4},
-        ],
-        [
-            {"label": "GPE", "start": 1, "end": 2},
-            {"label": "GPE", "start": 3, "end": 4},
-        ]
-    ]
-
-    result = list_to_spans(before)
-
-    assert result == expected
-
-test_list_to_spans()
 
 def find_overlap(true_range, pred_range):
     """Find the overlap between two ranges
