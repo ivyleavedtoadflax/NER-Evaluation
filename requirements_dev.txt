@@ -6,3 +6,6 @@ tox
 tox-gh-actions
 twine
 wheel
+gitchangelog
+typer
+wasabi
